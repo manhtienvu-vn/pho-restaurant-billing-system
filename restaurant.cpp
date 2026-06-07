@@ -6,7 +6,7 @@
 
 enum TableStatus {
     AVAILABLE = 0,
-    RESERVED
+    OCCUPIED
 };
 
 class MenuItem {
@@ -16,10 +16,23 @@ class MenuItem {
         float price;
     public:
         MenuItem (int ID, std::string n, float pr): id(ID), name(n), price(pr){};
+        float getPrice()
+        {
+            return price;
+        }
+        std::string getName()
+        {
+            return name;
+        }
+        int getId()
+        {
+            return id;
+        }
         void showItem()
         {
             std::cout << "Name: " << name << " | Price: " << price << "\n";
         }
+
 };
 
 class Menu {
@@ -49,21 +62,27 @@ class Menu {
 
 class OrderItem {
     private:
-        std::shared_ptr<MenuItem> item = std::make_unique<MenuItem>();
+        std::shared_ptr<MenuItem> item;
         int quantity;
     public:
-        OrderItem(int id){};
+        OrderItem(int id, int quantity){
+            item = std::make_shared<MenuItem>(id, quantity);
+        };
         int getQuantity()
         {
-            return quantity;
+            return this->quantity;
         }
-        void setQuantity(int q)
+        void setQuantity(int quantity)
         {
-            quantity = q;
+            this->quantity = quantity;
+        }
+        std::string getName()
+        {
+            return item->getName();
         }
         float calculateTotal()
         {
-            return static_cast<float>(quantity * p->price);
+            return static_cast<float>(quantity * item->getPrice());
         }
 };
 
@@ -72,7 +91,34 @@ class Order {
         int order_id;
         std::vector <OrderItem> items;
         std::string created_time;
+    public:
+        Order(){};
+        void addItem(int id, int quantity)
+        {
+            std::unique_ptr<OrderItem> new_order = std::make_unique <OrderItem>(id, quantity);
+        }
+        void removeItem(int id)
+        {
+
+        }
+        float calculateTotal()
+        {
+            float total = 0.0f;
+            for (auto &i: items){
+                total += static_cast<float>(i.calculateTotal());
+            }
+            return total;
+        }
+        void printBill()
+        {
+            float totalPrice = calculateTotal();
+            for (auto &v: items){
+                std::cout << "Item Name: " << v.getName() << " | Quantity: " << v.getQuantity() << "\n"; 
+            }
+            std::cout << "Total Price: " << totalPrice << "\n";
+        }
 };
+
 
 class Table {
     private:
@@ -87,7 +133,7 @@ class Table {
         }
         void close()
         {
-            status = RESERVED;
+            status = OCCUPIED;
         }
         bool isAvailable()
         {
@@ -99,13 +145,28 @@ class Table {
 class Restaurant 
 {
     private:
-        std::vector <Table> tables[10];    
+        std::vector <Table> tables;    
         Menu menu;
         std::vector <Order> orders;
     public:
+        Restaurant(){};
         void openTable(int table_id)
         {
+            Table table(table_id);
+            tables.push_back(table);
             tables[table_id].open();
+            std::cout << "[SUCCESS] Add new table with ID: "  << table_id <<  "\n";
         }
+        void addOrder(int table_id)
+        {
+            
+        }
+        void checkOut(int table_id)
+        {
 
+        }
+        void showRevenue()
+        {
+
+        }
 };
