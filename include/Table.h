@@ -21,6 +21,7 @@ class Table {
         void close();
         bool isOpened();
         void addOrderItem(std::shared_ptr<MenuItem> item, int quantity);
+        float calculateTotal();
         void printBill();
 };
 

@@ -45,6 +45,12 @@ void Restaurant::addOrder(int table_id, int item_id, int quantity)
     std::cout << "[SUCCESS] Ordered " << quantity << " " << item->getName() << " for Table with ID: " << table_id << "\n";
 }
 
+float Restaurant::getTotalFees(int table_id)
+{
+    float total_fees = tables[table_id-1].calculateTotal();
+    return total_fees;
+}
+
 void Restaurant::checkOut(int table_id)
 {
     if(!tables[table_id-1].isOpened())
@@ -60,9 +66,37 @@ void Restaurant::showMenu()
     this->menu.showMenu();
 }
 
+void Restaurant::showHistory()
+{
+    if (orders.empty())
+    {
+        std::cout << "[INFO] No order history found.\n";
+        return;
+    }
+
+    std::cout << "======== ORDER HISTORY ========\n";
+
+    int count = 1;
+
+    for (auto& order : orders)
+    {
+        std::cout << "\nOrder #" << count++ << "\n";
+        order.showBill();
+    }
+}
+
 void Restaurant::showRevenue()
 {
+    float totalRevenue = 0.0f;
 
+    for (auto& order : orders)
+    {
+        totalRevenue += order.calculateTotal();
+    }
+
+    std::cout << "======== REVENUE REPORT ========\n";
+    std::cout << "Total Orders : " << orders.size() << "\n";
+    std::cout << "Total Revenue: " << totalRevenue << " VND\n";
 }
 
 int Restaurant::getNumberOfTable()

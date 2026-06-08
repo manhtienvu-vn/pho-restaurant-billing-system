@@ -38,9 +38,15 @@ void Table::addOrderItem(std::shared_ptr<MenuItem> item, int quantity)
     current_order->addItemToOrder(item, quantity);
 }
 
+float Table::calculateTotal()
+{
+    float total_fees = current_order->calculateTotal();
+    return total_fees;
+}
+
 void Table::printBill()
 {
-    float totalFees = current_order->calculateTotal();
+    float total_fees = current_order->calculateTotal();
     current_order->showBill();
-    std::cout << "Total Fees: " << totalFees << "\n";
+    std::cout << "Total Fees: " << total_fees << "\n";
 }

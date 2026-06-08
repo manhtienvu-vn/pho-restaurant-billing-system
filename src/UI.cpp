@@ -1,5 +1,9 @@
 #include "UI.h"
 #include <iostream>
+#include "Payment.h"
+#include "CashPayment.h"
+#include "QRPayment.h"
+#include "FileManager.h"
 
 UI::UI(Restaurant& restaurant) : restaurant(restaurant){}
 
@@ -79,6 +83,87 @@ int UI::showOpenTablePage()
     return selection;
 }
 
+void UI::showPaymentPage(){
+    std::cout << "\n";
+    std::cout << "======== PAYMENT & CHECKOUT PAGE ========\n";
+    std::cout << "[USER] Type in the Table ID to CHECKOUT: ";
+    int table_id;
+    std::cin >> table_id;
+
+    while (table_id < 0 || table_id > restaurant.getNumberOfTable()){
+        std::cout << "[ERROR] Invalid table ID input. Try again!\n";
+        std::cout << "[USER] Type in the Table ID to CHECKOUT: ";
+        std::cin >> table_id;
+    }
+    std::cout << "======== SELECT PAYMENT METHOD ========\n";
+    std::cout << "***************************************************\n";
+    std::cout << "[1] Cash\n";
+    std::cout << "[2] QR Code\n";
+
+    int selection = UI::getUserInput(1, 2);
+    Payment *payment = nullptr;
+
+    std::string paymentMethod;
+
+    switch(selection){
+        case 1:
+        {
+            payment = new CashPayment();
+            paymentMethod = "Cash";
+
+            float total_fees = restaurant.getTotalFees(table_id);
+            payment->processPayment(total_fees);
+
+            FileManager fileManager("data/menu.csv", "data/orders.csv");
+            fileManager.saveCheckout(total_fees, paymentMethod);
+
+            break;
+        }
+        case 2:
+        {
+            payment = new QRPayment();
+            paymentMethod = "QR Code";
+
+            float total_fees = restaurant.getTotalFees(table_id);
+            payment->processPayment(total_fees);
+
+            FileManager fileManager("data/menu.csv", "data/orders.csv");
+            fileManager.saveCheckout(total_fees, paymentMethod);
+
+            break;
+        }
+    }
+
+    delete payment;
+    payment = nullptr;
+
+    restaurant.checkOut(table_id);
+    std::cout << "[SUCCESS] Successfully checked out for table with ID: " << table_id << "\n";
+    std::cout << "[INFO] Table with ID: " << table_id << " is closed!\n";
+}
+
+void UI::showHistoryPage()
+{
+    std::cout << "\n";
+    std::cout << "======== ORDER HISTORY ========\n";
+    std::cout << "[1] Show Checkout History\n";
+    std::cout << "[2] Show Total Revenue\n";
+
+    int selection = UI::getUserInput(1, 2);
+
+    switch(selection){
+        case 1:
+        {
+            restaurant.showHistory();
+            break;
+        }
+        case 2:
+        {
+            restaurant.showRevenue();
+            break;
+        }
+    }
+}
 void UI::run()
 {
     bool state = true;
@@ -115,10 +200,14 @@ void UI::run()
             }
             case 3:
             {    
+                UI::showPaymentPage();
                 break;
             }
             case 4:
             { 
+                FileManager fileManager("data/menu.csv", "data/orders.csv");
+                fileManager.showHistory();
+                fileManager.showRevenue();
                 break;
             }
         }

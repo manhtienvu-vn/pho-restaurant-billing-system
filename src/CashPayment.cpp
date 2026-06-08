@@ -8,6 +8,6 @@ CashPayment::CashPayment(){
 void CashPayment::processPayment(float amount)
 {
     std::cout << "======== CASH PAYMENT ========\n";
-    std::cout << "Amount: " << amount << "\n";
-    std::cout << "Payment completed! \n";
+    std::cout << "[INFO] Amount: " << amount << "\n";
+    std::cout << "[SUCCESS] Payment completed! \n";
 }

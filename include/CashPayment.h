@@ -5,8 +5,9 @@
 
 class CashPayment : public Payment 
 {
-    CashPayment();
-    void processPayment(float amount) override;
+    public:
+        CashPayment();
+        void processPayment(float amount) override;
 };
 
 #endif 

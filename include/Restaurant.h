@@ -18,8 +18,10 @@ class Restaurant
         Restaurant(int n);
         bool openTable(int table_id);
         void addOrder(int table_id, int item_id, int quantity);
+        float getTotalFees(int table_id);
         void checkOut(int table_id);
         void showMenu();
+        void showHistory();
         void showRevenue();
         int getNumberOfTable();
 };
