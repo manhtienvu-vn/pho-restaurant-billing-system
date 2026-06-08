@@ -1,8 +1,6 @@
 #include "FileManager.hpp"
 #include "Payment.hpp"
-
-// Include the Menu header
-// #include "Menu.hpp" 
+#include "Menu.h" 
 
 #include <iostream>
 #include <fstream>
@@ -42,6 +40,7 @@ void FileManager::loadMenu(Menu& menu) {
                 int id = std::stoi(idStr);
                 float price = std::stof(priceStr);
                 
+                // Matches the void addItemToMenu(int id, std::string name, float price); signature
                 menu.addItemToMenu(id, name, price);
                 loadedCount++;
             }
