@@ -17,7 +17,7 @@ class Table {
         std::unique_ptr <Order> current_order;
     public:
         Table (int id);
-        void open();
+        bool open();
         void close();
         bool isOpened();
         void addOrderItem(std::shared_ptr<MenuItem> item, int quantity);

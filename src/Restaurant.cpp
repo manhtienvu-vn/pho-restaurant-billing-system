@@ -1,5 +1,4 @@
 #include <Restaurant.h>
-
 Restaurant::Restaurant(int n){
 
     /* Initially, create a vector of 'num_of_table' tables for the restaurant*/
@@ -20,10 +19,12 @@ Restaurant::Restaurant(int n){
     menu.addItemToMenu(3, "Pho Bo Ga", 35000);
 }
 
-void Restaurant::openTable(int table_id)
+bool Restaurant::openTable(int table_id)
 {
-    tables[table_id-1].open();
-    std::cout << "[SUCCESS] Table with ID: "  << table_id << " is now opened for service!" << "\n";
+    if(tables[table_id-1].open()){
+        return true;
+    }
+    return false;
 }
 
 void Restaurant::addOrder(int table_id, int item_id, int quantity)
@@ -54,7 +55,17 @@ void Restaurant::checkOut(int table_id)
     tables[table_id-1].close();
 }
 
+void Restaurant::showMenu()
+{
+    this->menu.showMenu();
+}
+
 void Restaurant::showRevenue()
 {
 
+}
+
+int Restaurant::getNumberOfTable()
+{
+    return this->num_of_table;
 }

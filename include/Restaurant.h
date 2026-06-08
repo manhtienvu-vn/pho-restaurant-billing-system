@@ -16,10 +16,12 @@ class Restaurant
         int num_of_table;
     public:
         Restaurant(int n);
-        void openTable(int table_id);
+        bool openTable(int table_id);
         void addOrder(int table_id, int item_id, int quantity);
         void checkOut(int table_id);
+        void showMenu();
         void showRevenue();
+        int getNumberOfTable();
 };
 
 #endif

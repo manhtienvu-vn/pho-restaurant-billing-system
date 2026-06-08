@@ -5,12 +5,16 @@ Table::Table (int id): table_id(id), status(AVAILABLE) {
     current_order = nullptr;
 }
 
-void Table::open()
+bool Table::open()
 {
+    if (status == OCCUPIED){
+        return false;
+    }
     status = OCCUPIED;
     /* Only create order when the table is opened for service */
     /* Allocate memory for an exclusive-ownership 'Order' object for this 'Table' */
     current_order = std::make_unique <Order>();
+    return true;
 }
 
 void Table::close()
