@@ -40,12 +40,19 @@ void Table::addOrderItem(std::shared_ptr<MenuItem> item, int quantity)
 
 float Table::calculateTotal()
 {
+    if (!current_order) {
+        return 0.0f;
+    }
     float total_fees = current_order->calculateTotal();
     return total_fees;
 }
 
 void Table::printBill()
 {
+    if (!current_order) {
+        std::cout << "[INFO] Table " << table_id << " has no open order.\n";
+        return;
+    }
     float total_fees = current_order->calculateTotal();
     current_order->showBill();
     std::cout << "Total Fees: " << total_fees << "\n";

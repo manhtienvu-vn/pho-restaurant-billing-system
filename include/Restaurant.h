@@ -12,7 +12,6 @@ class Restaurant
     private:
         std::vector <Table> tables;    
         Menu menu;
-        std::vector <Order> orders;
         int num_of_table;
     public:
         Restaurant(int n);

@@ -20,6 +20,11 @@ std::string OrderItem::getName()
     return item->getName();
 }
 
+int OrderItem::getItemId()
+{
+    return item->getId();
+}
+
 float OrderItem::calculateTotal()
 {
     return static_cast<float>(quantity * item->getPrice());

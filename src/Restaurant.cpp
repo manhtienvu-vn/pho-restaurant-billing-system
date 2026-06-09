@@ -1,4 +1,5 @@
 #include <Restaurant.h>
+#include "FileManager.h"
 Restaurant::Restaurant(int n){
 
     /* Initially, create a vector of 'num_of_table' tables for the restaurant*/
@@ -21,6 +22,10 @@ Restaurant::Restaurant(int n){
 
 bool Restaurant::openTable(int table_id)
 {
+    if (table_id < 1 || table_id > num_of_table){
+        std::cout << "[ERROR] Invalid Table ID: " << table_id << ". Valid range is 1 to " << num_of_table << ".\n";
+        return false;
+    }
     if(tables[table_id-1].open()){
         return true;
     }
@@ -29,7 +34,7 @@ bool Restaurant::openTable(int table_id)
 
 void Restaurant::addOrder(int table_id, int item_id, int quantity)
 {
-    if (table_id < 0 || table_id > this->num_of_table){
+    if (table_id < 1 || table_id > this->num_of_table){
         std::cout << "[ERROR]: Invalid Table ID. Try again!" << "\n";
         return;
     } else if (!tables[table_id-1].isOpened()){
@@ -40,9 +45,13 @@ void Restaurant::addOrder(int table_id, int item_id, int quantity)
         std::cout << "[ERROR] Invalid quantity. Try again!" << "\n";
         return;
     }
-    std::shared_ptr<MenuItem> item = menu.findItemInMenu(item_id);
-    tables[table_id-1].addOrderItem(item, quantity);
-    std::cout << "[SUCCESS] Ordered " << quantity << " " << item->getName() << " for Table with ID: " << table_id << "\n";
+    try {
+        std::shared_ptr<MenuItem> item = menu.findItemInMenu(item_id);
+        tables[table_id-1].addOrderItem(item, quantity);
+        std::cout << "[SUCCESS] Ordered " << quantity << " " << item->getName() << " for Table with ID: " << table_id << "\n";
+    } catch (const std::out_of_range& e) {
+        std::cout << "[ERROR] Item ID " << item_id << " was not found in the menu.\n";
+    }
 }
 
 float Restaurant::getTotalFees(int table_id)
@@ -68,35 +77,14 @@ void Restaurant::showMenu()
 
 void Restaurant::showHistory()
 {
-    if (orders.empty())
-    {
-        std::cout << "[INFO] No order history found.\n";
-        return;
-    }
-
-    std::cout << "======== ORDER HISTORY ========\n";
-
-    int count = 1;
-
-    for (auto& order : orders)
-    {
-        std::cout << "\nOrder #" << count++ << "\n";
-        order.showBill();
-    }
+    FileManager fileManager("data/menu.csv", "data/orders.csv");
+    fileManager.showHistory();
 }
 
 void Restaurant::showRevenue()
 {
-    float totalRevenue = 0.0f;
-
-    for (auto& order : orders)
-    {
-        totalRevenue += order.calculateTotal();
-    }
-
-    std::cout << "======== REVENUE REPORT ========\n";
-    std::cout << "Total Orders : " << orders.size() << "\n";
-    std::cout << "Total Revenue: " << totalRevenue << " VND\n";
+    FileManager fileManager("data/menu.csv", "data/orders.csv");
+    fileManager.showRevenue();
 }
 
 int Restaurant::getNumberOfTable()

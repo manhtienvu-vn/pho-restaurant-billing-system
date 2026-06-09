@@ -10,7 +10,16 @@ void Order::addItemToOrder(std::shared_ptr<MenuItem> item, int quantity)
 
 void Order::removeItemFromOrder(int id)
 {
-
+    for (auto it = items.begin(); it != items.end(); ++it)
+    {
+        if (it->getItemId() == id)
+        {
+            items.erase(it);
+            std::cout << "[SUCCESS] Removed item with ID: " << id << " from the order.\n";
+            return;
+        }
+    }
+    std::cout << "[WARNING] Item with ID: " << id << " was not found in the order.\n";
 }
 
 float Order::calculateTotal()
