@@ -1,5 +1,6 @@
 #include "UI.h"
 #include <iostream>
+#include <limits>
 #include "Payment.h"
 #include "CashPayment.h"
 #include "QRPayment.h"
@@ -10,13 +11,13 @@ UI::UI(Restaurant& restaurant) : restaurant(restaurant){}
 int UI::getUserInput(int from, int to)
 {
     int selection;
-    std::cout << "[USER] Type in your selection from 1 to 4: ";
-    std::cin >> selection;
-    while (selection < from || selection > to)
+    std::cout << "[USER] Type in your selection from " << from << " to " << to << ": ";
+    while (!(std::cin >> selection) || selection < from || selection > to)
     {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "[ERROR] Invalid selection. Try again!\n";
-        std::cout << "[USER] Type in your selection from 1 to 4: ";
-        std::cin >> selection;
+        std::cout << "[USER] Type in your selection from " << from << " to " << to << ": ";
     }
     return selection;
 }
@@ -36,12 +37,11 @@ int UI::getTableID()
 {
     int table_id;
     std::cout << "[USER] Type in the table ID to order: ";
-    std::cin >> table_id;
-
-    while (table_id < 0 || table_id > restaurant.getNumberOfTable()){
+    while (!(std::cin >> table_id) || table_id < 1 || table_id > restaurant.getNumberOfTable()){
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "[ERROR] Invalid table ID input. Try again!\n";
         std::cout << "[USER] Type in the table ID to order: ";
-        std::cin >> table_id;
     }
     return table_id;
 }
@@ -49,7 +49,12 @@ int UI::getTableID()
 int UI::getItemID(){
     int item_id;
     std::cout << "[USER] Type in the item ID to order: ";
-    std::cin >> item_id;
+    while (!(std::cin >> item_id)){
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "[ERROR] Invalid item ID input. Try again!\n";
+        std::cout << "[USER] Type in the item ID to order: ";
+    }
     return item_id;
 }
 
@@ -57,11 +62,11 @@ int UI::getItemQuantity()
 {
     int quantity;
     std::cout << "[USER] Type in quantity to order: ";
-    std::cin >> quantity;
-    while (quantity <= 0){
+    while (!(std::cin >> quantity) || quantity <= 0){
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "[ERROR] Invalid quantity input. Try again!\n";
         std::cout << "[USER] Type in quantity to order: ";
-        std::cin >> quantity;
     }
     return quantity;
 }
@@ -79,7 +84,12 @@ int UI::showOpenTablePage()
     std::cout << "======== TABLE MANAGEMENT PAGE ========\n";
     std::cout << "[USER] Type in the Table ID to OPEN for service: ";
     int selection;
-    std::cin >> selection;
+    while (!(std::cin >> selection) || selection < 1 || selection > restaurant.getNumberOfTable()){
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "[ERROR] Invalid Table ID. Valid range is 1 to " << restaurant.getNumberOfTable() << ". Try again!\n";
+        std::cout << "[USER] Type in the Table ID to OPEN for service: ";
+    }
     return selection;
 }
 
@@ -88,13 +98,19 @@ void UI::showPaymentPage(){
     std::cout << "======== PAYMENT & CHECKOUT PAGE ========\n";
     std::cout << "[USER] Type in the Table ID to CHECKOUT: ";
     int table_id;
-    std::cin >> table_id;
-
-    while (table_id < 0 || table_id > restaurant.getNumberOfTable()){
+    while (!(std::cin >> table_id) || table_id < 1 || table_id > restaurant.getNumberOfTable()){
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "[ERROR] Invalid table ID input. Try again!\n";
         std::cout << "[USER] Type in the Table ID to CHECKOUT: ";
-        std::cin >> table_id;
     }
+
+    float total_fees = restaurant.getTotalFees(table_id);
+    if (total_fees <= 0.0f) {
+        std::cout << "[WARNING] Table " << table_id << " has no open order or zero total. Payment skipped.\n";
+        return;
+    }
+
     std::cout << "======== SELECT PAYMENT METHOD ========\n";
     std::cout << "***************************************************\n";
     std::cout << "[1] Cash\n";
@@ -105,33 +121,35 @@ void UI::showPaymentPage(){
 
     std::string paymentMethod;
 
-    switch(selection){
-        case 1:
-        {
-            payment = new CashPayment();
-            paymentMethod = "Cash";
+    try {
+        switch(selection){
+            case 1:
+            {
+                payment = new CashPayment();
+                paymentMethod = "Cash";
 
-            float total_fees = restaurant.getTotalFees(table_id);
-            payment->processPayment(total_fees);
+                payment->processPayment(total_fees);
 
-            FileManager fileManager("data/menu.csv", "data/orders.csv");
-            fileManager.saveCheckout(total_fees, paymentMethod);
+                FileManager fileManager("data/menu.csv", "data/orders.csv");
+                fileManager.saveCheckout(total_fees, paymentMethod);
 
-            break;
+                break;
+            }
+            case 2:
+            {
+                payment = new QRPayment();
+                paymentMethod = "QR Code";
+
+                payment->processPayment(total_fees);
+
+                FileManager fileManager("data/menu.csv", "data/orders.csv");
+                fileManager.saveCheckout(total_fees, paymentMethod);
+
+                break;
+            }
         }
-        case 2:
-        {
-            payment = new QRPayment();
-            paymentMethod = "QR Code";
-
-            float total_fees = restaurant.getTotalFees(table_id);
-            payment->processPayment(total_fees);
-
-            FileManager fileManager("data/menu.csv", "data/orders.csv");
-            fileManager.saveCheckout(total_fees, paymentMethod);
-
-            break;
-        }
+    } catch (const std::exception& e) {
+        std::cerr << "[ERROR] Payment failed: " << e.what() << "\n";
     }
 
     delete payment;
@@ -171,12 +189,13 @@ void UI::run()
     while (state){
         int selection;
         UI::showMainPage();
-        selection = UI::getUserInput(1, 4);
+        selection = UI::getUserInput(0, 4);
 
         switch (selection){
             case 0:
             {
                 state = false;
+                std::cout << "[INFO] Exiting Pho Anh Hai Restaurant System. Goodbye!\n";
                 break;
             }
             case 1:
@@ -205,9 +224,7 @@ void UI::run()
             }
             case 4:
             { 
-                FileManager fileManager("data/menu.csv", "data/orders.csv");
-                fileManager.showHistory();
-                fileManager.showRevenue();
+                UI::showHistoryPage();
                 break;
             }
         }

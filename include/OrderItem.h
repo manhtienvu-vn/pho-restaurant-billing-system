@@ -14,6 +14,7 @@ class OrderItem {
         int getQuantity();
         void setQuantity(int quantity);
         std::string getName();
+        int getItemId();
         float calculateTotal();
 };
 

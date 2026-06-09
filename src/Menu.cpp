@@ -19,7 +19,7 @@ void Menu::showMenu()
     int count = 1;
     std::cout << "--------RESTAURANT MENU--------" << "\n";
     for (const auto &pair : items){
-        std::cout << "1. Item ID: " << pair.first << " | ";
+        std::cout << count++ << ". Item ID: " << pair.first << " | ";
         pair.second->showItem();
     }
 }
